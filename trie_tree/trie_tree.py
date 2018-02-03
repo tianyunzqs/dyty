@@ -89,25 +89,25 @@ class Trie:
 
 
 def gen_trie(f_name):
-	"""
-	构建trie树
-	:param f_name: 用户词典路径
-	:return: trie词典树
-	"""
-	trie = {}
-	with open(f_name, "r", encoding="utf-8") as f:
-		lines = f.readlines()
-		for line in lines:
-			parts = re.split(r"\s+", line.strip())
-			if len(parts) == 2:
-				word, freq = parts
-				p = trie
-				for w in word:
-					if w not in p:
-						p[w] = {}
-					p = p[w]
-				p[""] = ""
-	return trie
+    """
+    构建trie树
+    :param f_name: 用户词典路径
+    :return: trie词典树
+    """
+    trie = {}
+    with open(f_name, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        for line in lines:
+            parts = re.split(r"\s+", line.strip())
+            if len(parts) == 2:
+                word, freq = parts
+                p = trie
+                for w in word:
+                    if w not in p:
+                        p[w] = {}
+                    p = p[w]
+                p[""] = ""
+    return trie
 
 
 # trie = Trie()
