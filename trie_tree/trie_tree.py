@@ -94,7 +94,7 @@ def gen_trie(f_name):
 	:param f_name: 用户词典路径
 	:return: trie词典树
 	"""
-    trie = {}
+	trie = {}
 	with open(f_name, "r", encoding="utf-8") as f:
 		lines = f.readlines()
 		for line in lines:
