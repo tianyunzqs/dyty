@@ -174,10 +174,12 @@ def dyty_cut2(sentence):
 
 def dyty_cut(sentence):
     N = len(sentence)
-    i, j, k = 0, 0, 0
+    i, j, cur_ind = 0, 0, 0
     p = trie2
     while i < N:
         c = sentence[j]
+        if j > cur_ind:
+            cur_ind = j
         if c in p:
             p = p[c]
             if '' in p:
@@ -189,6 +191,8 @@ def dyty_cut(sentence):
                 p = trie2
         else:
             p = trie2
+            if cur_ind == j and cur_ind == i and sentence[cur_ind] not in p:
+                print("word = ", sentence[cur_ind])
             i += 1
             j = i
 
@@ -216,6 +220,7 @@ def dyty_cut(sentence):
 # text = "小明是县长"
 # text = "小明县长"
 text = "小明是小程序员吗？"
+# text = "Python 自然语言处理 入门—关于jieba库的使用 - 简书"
 dyty_cut(text)
 # print(list(__cut_all(text)))
 exit(0)
