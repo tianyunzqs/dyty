@@ -91,8 +91,8 @@ def initialize(*args):
 
         if load_from_cache_fail:
             trie,FREQ,total = gen_trie(abs_path)
-            FREQ = dict([(k,log(float(v)/total)) for k,v in FREQ.iteritems()]) #normalize
-            min_freq = min(FREQ.itervalues())
+            FREQ = dict([(k,log(float(v)/total)) for k,v in FREQ.items()]) #normalize
+            min_freq = min(FREQ.values())
             logger.debug("dumping model to file cache %s" % cache_file)
             try:
                 tmp_suffix = "."+str(random.random())
@@ -131,7 +131,7 @@ def require_initialized(fn):
 def __cut_all(sentence):
     dag = get_DAG(sentence)
     old_j = -1
-    for k,L in dag.iteritems():
+    for k,L in dag.items():
         if len(L)==1 and k>old_j:
             yield sentence[k:L[0]+1]
             old_j = L[0]
@@ -329,114 +329,114 @@ def cut_for_search(sentence,HMM=True):
 #             add_word(word, freq, tup[2])
 #         else:
 #             add_word(word, freq)
-
-@require_initialized
-def add_word(word, freq, tag=None):
-    global FREQ, trie, total, user_word_tag_tab
-    freq = float(freq)
-    FREQ[word] = log(freq / total)
-    if tag is not None:
-        user_word_tag_tab[word] = tag.strip()
-    p = trie
-    for c in word:
-        if c not in p:
-            p[c] = {}
-        p = p[c]
-    p[''] = ''                  # ending flag
-
-__ref_cut = cut
-__ref_cut_for_search = cut_for_search
-
-def __lcut(sentence):
-    return list(__ref_cut(sentence,False))
-def __lcut_no_hmm(sentence):
-    return list(__ref_cut(sentence,False,False))
-def __lcut_all(sentence):
-    return list(__ref_cut(sentence,True))
-def __lcut_for_search(sentence):
-    return list(__ref_cut_for_search(sentence))
-
-
-@require_initialized
-def enable_parallel(processnum=None):
-    global pool,cut,cut_for_search
-    if os.name=='nt':
-        raise Exception("jieba: parallel mode only supports posix system")
-    if sys.version_info[0]==2 and sys.version_info[1]<6:
-        raise Exception("jieba: the parallel feature needs Python version>2.5 ")
-    from multiprocessing import Pool,cpu_count
-    if processnum==None:
-        processnum = cpu_count()
-    pool = Pool(processnum)
-
-    def pcut(sentence,cut_all=False,HMM=True):
-        parts = re.compile('([\r\n]+)').split(sentence)
-        if cut_all:
-            result = pool.map(__lcut_all,parts)
-        else:
-            if HMM:
-                result = pool.map(__lcut,parts)
-            else:
-                result = pool.map(__lcut_no_hmm,parts)
-        for r in result:
-            for w in r:
-                yield w
-
-    def pcut_for_search(sentence):
-        parts = re.compile('([\r\n]+)').split(sentence)
-        result = pool.map(__lcut_for_search,parts)
-        for r in result:
-            for w in r:
-                yield w
-
-    cut = pcut
-    cut_for_search = pcut_for_search
-
-def disable_parallel():
-    global pool,cut,cut_for_search
-    if 'pool' in globals():
-        pool.close()
-        pool = None
-    cut = __ref_cut
-    cut_for_search = __ref_cut_for_search
-
-def set_dictionary(dictionary_path):
-    global initialized, DICTIONARY
-    with DICT_LOCK:
-        abs_path = os.path.normpath( os.path.join( os.getcwd(), dictionary_path )  )
-        if not os.path.exists(abs_path):
-            raise Exception("jieba: path does not exist:" + abs_path)
-        DICTIONARY = abs_path
-        initialized = False
-
-def get_abs_path_dict():
-    _curpath=os.path.normpath( os.path.join( os.getcwd(), os.path.dirname(__file__) )  )
-    abs_path = os.path.join(_curpath,DICTIONARY)
-    return abs_path
-
-def tokenize(unicode_sentence,mode="default",HMM=True):
-    #mode ("default" or "search")
-    # if not isinstance(unicode_sentence, unicode):
-    #     raise Exception("jieba: the input parameter should  unicode.")
-    start = 0
-    if mode=='default':
-        for w in cut(unicode_sentence,HMM=HMM):
-            width = len(w)
-            yield (w,start,start+width)
-            start+=width
-    else:
-        for w in cut(unicode_sentence,HMM=HMM):
-            width = len(w)
-            if len(w)>2:
-                for i in range(len(w)-1):
-                    gram2 = w[i:i+2]
-                    if gram2 in FREQ:
-                        yield (gram2,start+i,start+i+2)
-            if len(w)>3:
-                for i in range(len(w)-2):
-                    gram3 = w[i:i+3]
-                    if gram3 in FREQ:
-                        yield (gram3,start+i,start+i+3)
-            yield (w,start,start+width)
-            start+=width
+#
+# @require_initialized
+# def add_word(word, freq, tag=None):
+#     global FREQ, trie, total, user_word_tag_tab
+#     freq = float(freq)
+#     FREQ[word] = log(freq / total)
+#     if tag is not None:
+#         user_word_tag_tab[word] = tag.strip()
+#     p = trie
+#     for c in word:
+#         if c not in p:
+#             p[c] = {}
+#         p = p[c]
+#     p[''] = ''                  # ending flag
+#
+# __ref_cut = cut
+# __ref_cut_for_search = cut_for_search
+#
+# def __lcut(sentence):
+#     return list(__ref_cut(sentence,False))
+# def __lcut_no_hmm(sentence):
+#     return list(__ref_cut(sentence,False,False))
+# def __lcut_all(sentence):
+#     return list(__ref_cut(sentence,True))
+# def __lcut_for_search(sentence):
+#     return list(__ref_cut_for_search(sentence))
+#
+#
+# @require_initialized
+# def enable_parallel(processnum=None):
+#     global pool,cut,cut_for_search
+#     if os.name=='nt':
+#         raise Exception("jieba: parallel mode only supports posix system")
+#     if sys.version_info[0]==2 and sys.version_info[1]<6:
+#         raise Exception("jieba: the parallel feature needs Python version>2.5 ")
+#     from multiprocessing import Pool,cpu_count
+#     if processnum==None:
+#         processnum = cpu_count()
+#     pool = Pool(processnum)
+#
+#     def pcut(sentence,cut_all=False,HMM=True):
+#         parts = re.compile('([\r\n]+)').split(sentence)
+#         if cut_all:
+#             result = pool.map(__lcut_all,parts)
+#         else:
+#             if HMM:
+#                 result = pool.map(__lcut,parts)
+#             else:
+#                 result = pool.map(__lcut_no_hmm,parts)
+#         for r in result:
+#             for w in r:
+#                 yield w
+#
+#     def pcut_for_search(sentence):
+#         parts = re.compile('([\r\n]+)').split(sentence)
+#         result = pool.map(__lcut_for_search,parts)
+#         for r in result:
+#             for w in r:
+#                 yield w
+#
+#     cut = pcut
+#     cut_for_search = pcut_for_search
+#
+# def disable_parallel():
+#     global pool,cut,cut_for_search
+#     if 'pool' in globals():
+#         pool.close()
+#         pool = None
+#     cut = __ref_cut
+#     cut_for_search = __ref_cut_for_search
+#
+# def set_dictionary(dictionary_path):
+#     global initialized, DICTIONARY
+#     with DICT_LOCK:
+#         abs_path = os.path.normpath( os.path.join( os.getcwd(), dictionary_path )  )
+#         if not os.path.exists(abs_path):
+#             raise Exception("jieba: path does not exist:" + abs_path)
+#         DICTIONARY = abs_path
+#         initialized = False
+#
+# def get_abs_path_dict():
+#     _curpath=os.path.normpath( os.path.join( os.getcwd(), os.path.dirname(__file__) )  )
+#     abs_path = os.path.join(_curpath,DICTIONARY)
+#     return abs_path
+#
+# def tokenize(unicode_sentence,mode="default",HMM=True):
+#     #mode ("default" or "search")
+#     # if not isinstance(unicode_sentence, unicode):
+#     #     raise Exception("jieba: the input parameter should  unicode.")
+#     start = 0
+#     if mode=='default':
+#         for w in cut(unicode_sentence,HMM=HMM):
+#             width = len(w)
+#             yield (w,start,start+width)
+#             start+=width
+#     else:
+#         for w in cut(unicode_sentence,HMM=HMM):
+#             width = len(w)
+#             if len(w)>2:
+#                 for i in range(len(w)-1):
+#                     gram2 = w[i:i+2]
+#                     if gram2 in FREQ:
+#                         yield (gram2,start+i,start+i+2)
+#             if len(w)>3:
+#                 for i in range(len(w)-2):
+#                     gram3 = w[i:i+3]
+#                     if gram3 in FREQ:
+#                         yield (gram3,start+i,start+i+3)
+#             yield (w,start,start+width)
+#             start+=width
 
