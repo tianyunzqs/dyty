@@ -110,7 +110,6 @@ def gen_trie(f_name):
     return trie
 
 
-
 _curpath=os.path.normpath( os.path.join( os.getcwd(), os.path.dirname(__file__) )  )
 # print("Building Trie...", file=sys.stderr)
 trie2 = gen_trie(os.path.join(_curpath, "dict2.txt"))
@@ -144,31 +143,82 @@ def __cut_all(sentence):
             j=i
 
 
-def dyty_cut(sentence):
-    start_loc, end_loc, end = 0, 0, 0
+def dyty_cut2(sentence):
+    start_loc, end_loc, end, ns = 0, 0, 0, 0
     p = trie2
     for loc, char in enumerate(sentence):
         if char in p:
             end_loc += 1
             p = p[char]
             if "" in p:
-                end = end_loc
+                ns += 1
+                if ns == 1:
+                    end = end_loc
                 print("word = ", sentence[start_loc: end_loc])
         else:
-            end_loc += 1
+            ns = 0
+            if char in trie2:
+                start_loc = end
+                p = trie2[char]
+                continue
+            if "" in p:
+                print("word = ", sentence[start_loc: loc])
+                continue
             if p != trie2:
                 start_loc = end
             print("word = ", sentence[start_loc: end_loc])
+            end_loc += 1
             start_loc = end_loc
             p = trie2
 
 
+def dyty_cut(sentence):
+    N = len(sentence)
+    i, j, k = 0, 0, 0
+    p = trie2
+    while i < N:
+        c = sentence[j]
+        if c in p:
+            p = p[c]
+            if '' in p:
+                print("word = ", sentence[i: j + 1])
+            j += 1
+            if j >= N:
+                i += 1
+                j = i
+                p = trie2
+        else:
+            p = trie2
+            i += 1
+            j = i
+
+
+    # for loc, char in enumerate(sentence):
+    #     if char in p:
+    #         end_loc += 1
+    #         p = p[char]
+    #         if "" in p:
+    #             print("word = ", sentence[start_loc: end_loc])
+    #     else:
+    #         start_loc = end_loc
+    #         end_loc += 1
+    #         if char in trie2:
+    #             p = trie2[char]
+    #         else:
+    #             p = trie2
+    #             print("word = ", sentence[start_loc: end_loc])
+    #             start_loc = end_loc
+
+
 # text = "我是谁"
 # text = "小明是谁"
+# text = "谁是小明"
 # text = "小明是县长"
 # text = "小明县长"
-# dyty_cut(text)
-# exit(0)
+text = "小明是小程序员吗？"
+dyty_cut(text)
+# print(list(__cut_all(text)))
+exit(0)
 
 
 # t1 = time.time()
